@@ -13,7 +13,7 @@
 ' //
 ' // File:      LTIApply.wsf
 ' // 
-' // Version:   6.3.8456.1000
+' // Version:   6.3.8456.2000
 ' // 
 ' // Purpose:   Apply image (OS or PE) to the hard drive
 ' // 
@@ -1020,7 +1020,7 @@ Class LTIApply
 
 	Function ApplyUnattend
 
-		Dim iRC
+		Dim iRC, sfile
 
 
 		' Create the scratch folder (needed for servicing)
@@ -1028,20 +1028,29 @@ Class LTIApply
 		oUtility.VerifyPathExists oUtility.LocalRootPath & "\Scratch"
 		oLogging.CreateEntry "Created scratch folder.", LogTypeInfo
 
+		For each sFile in Array("unattend.xml","unattend0.xml","unattend1.xml","unattend2.xml","unattend3.xml","unattend4.xml","unattend5.xml")
+		
+			If oFSO.fileExists(oUtility.LocalRootPath & "\" & sFile) Then
 
-		' Copy the unattend.xml into the Panther folder (looks like DISM doesn't do this)
+				oLogging.CreateEntry "===> Applying " & sFile & " file" , LogTypeInfo
 
-		oUtility.VerifyPathExists sDestinationDrive & "\Windows\Panther\Unattend"
-		oFileHandling.CopyFile oUtility.LocalRootPath & "\unattend.xml", sDestinationDrive & "\Windows\Panther\Unattend.xml", true
-		oLogging.CreateEntry "Copied unattend.xml to " & sDestinationDrive & "\Windows\Panther for image apply.", LogTypeInfo
+				' Copy the unattend.xml into the Panther folder (looks like DISM doesn't do this)
+
+				oUtility.VerifyPathExists sDestinationDrive & "\Windows\Panther\Unattend"
+				oFileHandling.CopyFile oUtility.LocalRootPath & "\" & sFile, sDestinationDrive & "\Windows\Panther\" & sFile, true
+				oLogging.CreateEntry "Copied " & sFile & " to " & sDestinationDrive & "\Windows\Panther for image apply.", LogTypeInfo
 
 
-		' Apply the unattend.xml.  This takes care of driver injection and servicing (patch, LP, etc.)  Do this from the Panther folder
-		' so that the \Drivers relative path in the unattend.xml works properly.
+				' Apply the unattend.xml.  This takes care of driver injection and servicing (patch, LP, etc.)  Do this from the Panther folder
+				' so that the \Drivers relative path in the unattend.xml works properly.
 
-		oLogging.ReportProgress "Applying unattend.xml with DISM.EXE.", 99
-		iRC = oUtility.RunWithConsoleLogging("dism.exe /Image:" & sDestinationDrive & "\ /Apply-Unattend:" & sDestinationDrive & "\Windows\Panther\Unattend.xml /ScratchDir:" & oUtility.LocalRootPath & "\Scratch")
-		TestAndFail iRc, 5627, "Run DISM.exe"
+				oLogging.ReportProgress "Applying " & sFile & " with DISM.EXE.", 99
+				iRC = oUtility.RunWithConsoleLogging("dism.exe /Image:" & sDestinationDrive & "\ /Apply-Unattend:" & sDestinationDrive & "\Windows\Panther\" & sFile & " /ScratchDir:" & oUtility.LocalRootPath & "\Scratch")
+				TestAndFail iRc, 5627, "Run DISM.exe"
+
+			End If
+		
+		Next
 
 	End Function
 

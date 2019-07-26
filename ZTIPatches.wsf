@@ -11,7 +11,7 @@
 ' //
 ' // File:      ZTIPatches.wsf
 ' // 
-' // Version:   6.3.8456.1000
+' // Version:   6.3.8456.2000
 ' // 
 ' // Purpose:   Adds the appropriate OS packages (language packs, security 
 ' //            updates, etc.) to the unattend.xml for offline installation.
@@ -97,6 +97,15 @@ Class ZTIPatches
 			sPlatform = "x86"
 		End if
 		oLogging.CreateEntry "Operating system being deployed requires " & sPlatform & " updates.", LogTypeInfo
+
+
+		' Define the number of different packages profiles to inject
+		If oEnvironment.Item("PackageProfileCount") = "" Then 
+			oEnvironment.Item("PackageProfileCount") = 0
+		Else
+			oEnvironment.Item("PackageProfileCount") = oEnvironment.Item("PackageProfileCount") + 1 
+		End If
+		oLogging.CreateEntry "Working on Selection profile " & oEnvironment.Item("PackageProfileCount") & " with name " & oEnvironment.Item("PackageSelectionProfile"), LogTypeInfo
 
 
 		' Find the Unattend.xml file.
@@ -400,8 +409,8 @@ Class ZTIPatches
 
 
 		' Remove extra xmlns="" entry and save the XML
-		oLogging.CreateEntry "Ready to Save!", LogTypeInfo
-
+		XMLFile = Replace (XMLFile,"Unattend.xml", "Unattend" + oEnvironment.Item("PackageProfileCount") + ".xml" )
+		oLogging.CreateEntry "Ready to Save " & XMLFile & " for Profile " &  oEnvironment.Item("PackageSelectionProfile"), LogTypeInfo
 		Set f = oFso.CreateTextFile( XMLFile, TRUE, TRUE )
 		f.Write Replace( xmlDoc.xml, " xmlns=""""", "" , vbTextCompare)
 		f.Close
