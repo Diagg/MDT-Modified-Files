@@ -12,6 +12,7 @@ This way, Servicing stack update can be applied separately from other packages o
 without breaking Task sequence execution.
 
 Affected files: [ZTIPatches.wsf](https://github.com/Diagg/MDT-Modified-Files/blob/master/ZTIPatches.wsf),[LTIApply.wsf](https://github.com/Diagg/MDT-Modified-Files/blob/master/LTIApply.wsf)
+
 Full details: [MDT: unable to apply servicing stacks updates on Server 2016/2019](https://www.osd-couture.com/)
 Release date: 07/26/2019
                 
